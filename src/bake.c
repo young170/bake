@@ -1,8 +1,3 @@
-/* CITS2002 Project 2018
- * Names: Bruce How, Vincent Tian
- * Student numbers:	22242664, 22262122
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +19,8 @@ char *targetToBuild = NULL;
  * exit statuses, the iflag and action line modifiers to alter the output
  */
 void execute(char *command) {
-	bool silenced = sflag;
+	bool silenced = s_option_flag;
+
 	switch(fork()) {
 		case -1: // Process creation failed
 			perror("Fork");
@@ -34,16 +30,19 @@ void execute(char *command) {
 				silenced = true;
 				command++;
 			}
+
 			if(!silenced) {
 				printf("%s\n", command);
 			}
+
 			execl("/bin/sh", "sh", "-c", command, NULL);
-			perror("execl");
+			    perror("execl");
 			break;
 		default: {
 			int status;
 			wait(&status);
-			if(WEXITSTATUS(status) != 0 && !iflag && *command != '-') {
+
+			if(WEXITSTATUS(status) != 0 && !i_option_flag && *command != '-') {
 				printf("Bake: Unsucessful execution at\n\t'%s'\n", command);
 				exit(EXIT_FAILURE);
 			}
@@ -103,7 +102,7 @@ void buildTarget(char *target) {
 	}
 	if(buildRequired) {
 		for(int i = 0; i < it->numAct; i++) {
-			if(nflag) {
+			if(n_option_flag) {
 				// Just print, dont execute the commands
 				printf("%s\n", it->actions[i]);
 			} else {

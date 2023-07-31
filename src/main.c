@@ -1,8 +1,3 @@
-/* CITS2002 Project 2018
- * Names: Bruce How, Vincent Tian
- * Student numbers:	22242664, 22262122
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -20,9 +15,9 @@
 #define OPTLIST "C:f:inps"
 
 // Argument flags
-bool iflag = false;
-bool nflag = false;
-bool sflag = false;
+bool i_option_flag = false;
+bool n_option_flag = false;
+bool s_option_flag = false;
 
 /**
  * Prints all variables, targets and actions to the user. The function iterates
@@ -67,33 +62,39 @@ void printInfo() {
  * arguments using getopt() and prints appropiate error messages where needed
  */
 int main(int argc, char *argv[]) {
+	int opt; // getopt()
 
-	int opt;
-	bool pflag = false;
 	char *filename = NULL;
 	char *dirpath = NULL;
-	opterr = 0; // Use custom error printing
+
+    bool p_option_flag = false;
+    bool c_option_flag = false;
+    bool f_option_flag = false;
+
+	opterr = 0; // use custom error printing
 
 	// Argument handler
 	while((opt = getopt(argc, argv, OPTLIST)) != -1) {
 		switch(opt) {
 			case 'i':
-				iflag = !iflag;
+				i_option_flag = !i_option_flag;
 				break;
 			case 'n':
-				nflag = !nflag;
+				n_option_flag = !n_option_flag;
 				break;
 			case 'p':
-				pflag = !pflag;
+				p_option_flag = !p_option_flag;
 				break;
 			case 's':
-				sflag = !sflag;
+				s_option_flag = !s_option_flag;
 				break;
 			case 'C':
 				dirpath = strdup(optarg);
+                c_option_flag = !c_option_flag;
 				break;
 			case 'f':
 				filename = strdup(optarg);
+                f_option_flag = !f_option_flag;
 				break;
 			case '?':
 				if(optopt == 'C') {
@@ -108,28 +109,32 @@ int main(int argc, char *argv[]) {
 				}
 		}
 	}
-	// Check for any targetname options
-	char *targetToBuild = NULL;
+
+	// check for any targetname options
+	char *build_target = NULL;
 	argc -= optind;
 	argv += optind;
+
 	if(argc > 0) {
-		targetToBuild = *argv;
+		build_target = *argv;
 	}
 
-	// Check argument values
-	if(dirpath != NULL) {
+	// check argument values
+	if(dirpath != NULL) { // -C, change working directory
 		int result = chdir(dirpath);
+
 		if(result != 0) {
 			fprintf(stderr, "%s: No such directory\n", dirpath);
 			exit(EXIT_FAILURE);
 		}
 	}
-	if(filename == NULL) {
+
+	if(filename == NULL) { // -f, change default bakefile
 		filename = "bakefile";
 	}
 
 	FILE *fp = fopen(filename, "r");
-	if(fp == NULL) {
+	if(fp == NULL) { // fopen() error checking
 		if(dirpath == NULL) {
 			perror(filename);
 		} else {
@@ -138,12 +143,21 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	// Iterate through the file
+    // free allocated memory by strdup
+    if (c_option_flag) {
+        free(dirpath);
+    }
+
+    if (f_option_flag) {
+        free(filename);
+    }
+
+	// iterate through the file
 	while(!feof(fp)) {
-		// Reads extended '\' lines
+		// reads extended '\' lines
 		char *extend = readFile(fp);
 
-		// Process the line if valid
+		// process the line if valid
 		if(extend && extend[0] != '\0') {
 			char *line = expandVariables(extend);
 			if(currentTarget != NULL && *line == '\t') {
@@ -154,11 +168,9 @@ int main(int argc, char *argv[]) {
 	        }
 		}
 	}
-	if(pflag) {
-		printInfo();
-	} else {
-		bake(targetToBuild);
-	}
+
+    (p_option_flag) ? printInfo() : bake(build_target);
+
 	fclose(fp);
 	exit(EXIT_SUCCESS);
 }
