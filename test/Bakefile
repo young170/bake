@@ -1,0 +1,11 @@
+# Bakefile for Bake
+
+PROGNAME = test
+C99 = gcc -std=c99 -Werror -Wall -pedantic
+DEPENDENCIES = test.c
+
+$(PROGNAME) : $(DEPENDENCIES)
+	@$(C99) -o $(PROGNAME) $(DEPENDENCIES)
+	
+clean :
+	@rm -f $(PROGNAME)

@@ -8,14 +8,16 @@
 CC = gcc -std=c99 -Werror -Wall -pedantic
 INCDIR = ./include
 SRCDIR = ./src
-
-SRC = $(SRCDIR)/rushhour.c
-OBJ = $(SRC:.c=.o)
 EXE = bake
 
+# List all source files
+SRC = $(wildcard $(SRCDIR)/*.c)
+
+# Create a list of corresponding object files
+OBJ = $(SRC:$(SRCDIR)/%.c=$(SRCDIR)/%.o)
+
 # rule for link
-all: $(EXE)
-$(EXE): $(SRCDIR)/%.o
+$(EXE): $(OBJ)
 	$(CC) -o $@ $^
 
 # rule for compilation
