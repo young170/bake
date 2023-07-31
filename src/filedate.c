@@ -23,9 +23,11 @@ bool isUrl(char *dependency) {
  * Uses stat to return the modified date of a file
  */
 time_t getFileModDate(char *file) {
-    if(stat(file, &statAttribute) < 0) {
+    if(stat(file, &statAttribute) < 0) { // struct stat
         return 0;
     }
+
     fileAttribute = gmtime(&statAttribute.st_mtime);
+    
     return(mktime(fileAttribute));
 }

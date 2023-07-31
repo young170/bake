@@ -12,6 +12,7 @@ void trimLine(char *line) {
             *line = '\0';
             break;
         }
+
         line++;
     }
 }
@@ -21,34 +22,38 @@ void trimLine(char *line) {
  * the extension line char, '\'. Extends the line to the next line accordingly.
  * Comment lines, starting with '#' are excluded at this point
  */
-char* readFile(FILE *bakefile) {
+char* read_file(FILE *bakefile) {
 	char line[BUFSIZ];
     int len = 0;
 
-    char *fullLine = NULL;
-    int fullLen = 0;
+    char *full_line = NULL;
+    int full_len = 0;
 
-	while(fgets(line, sizeof line, bakefile) != NULL) {
+	while(fgets(line, sizeof line, bakefile) != NULL) { // read line-by-line
         // Exclude comment lines
         if(*line == '#') {
             continue;
         }
-		trimLine(line);
-        len = strlen(line);
-        fullLen += len;
 
-        if(fullLine == NULL) {
-            fullLine = strdup(line);
+		trimLine(line);
+
+        len = strlen(line);
+        full_len += len;
+
+        if(full_line == NULL) {
+            full_line = strdup(line);
         } else {
-            fullLine = realloc(fullLine, fullLen+1);
-            strcat(fullLine, line);
+            full_line = realloc(full_line, full_len+1);
+            strcat(full_line, line);
         }
 
         // Check for more continuation symbols
-        if(fullLine[fullLen-1] != '\\') {
+        if(full_line[full_len-1] != '\\') {
             break;
         }
-        fullLine[--fullLen] = '\0';
+
+        full_line[--full_len] = '\0';
 	}
-    return fullLine;
+    
+    return full_line;
 }

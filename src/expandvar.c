@@ -22,17 +22,22 @@ char *fetchVariable(char *var) {
     if(strcmp(var, "PID") == 0) {
         int pid = getpid();
         int pidLen = floor(log10(abs(pid))) + 1;
+
         char *buffer = malloc(sizeof(char) * pidLen);
         sprintf(buffer, "%d", pid);
+
         return buffer;
     } else if(strcmp(var, "PPID") == 0) {
         int ppid = getppid();
         int ppidLen = floor(log10(abs(ppid))) + 1;
+
         char *buffer = malloc(sizeof(char) * ppidLen);
         sprintf(buffer, "%d", ppid);
+
         return buffer;
     } else if(strcmp(var, "PWD") == 0) {
         char *cwd = malloc(sizeof(char)*PATH_MAX);
+
         if(getcwd(cwd, sizeof(char)*PATH_MAX) != NULL) {
             return cwd;
         } else {
@@ -42,20 +47,29 @@ char *fetchVariable(char *var) {
     } else if(strcmp(var, "RAND") == 0) {
         int num = rand();
         int numLen = floor(log10(abs(num))) + 1;
+
         char *buffer = malloc(sizeof(char) * numLen);
         sprintf(buffer, "%i", num);
+
         return buffer;
     } else if(strcmp(var, "HOME") == 0) {
-        return getenv("HOME");
+        return getenv("HOME"); // ./~
     }
+
     struct variableNode *it = variableList;
+
     while(it != NULL) {
         if(strcmp(it->variable, var) == 0) {
             return it->value;
         }
+
         it = it->next;
     }
-    return "";
+
+    fprintf(stderr, "%s: Variable undefined\n", var);
+    // should the program be terminated?
+    // the variable can be simply not be expanded to retain its written self
+    return var;
 }
 
 /**
@@ -76,35 +90,48 @@ char *expandVariables(char *ch) {
             ch++;
             continue;
         }
+
         var = append(var, *ch);
         ch++;
+
         // Check for preceeding (
         if(*ch != '(') {
             expanded = appendStr(expanded, var);
             var = NULL;
             continue;
         }
+
         // We have $(..
         var = append(var, *ch);
         ch++;
+
         while(*ch != ')' && *ch != '\0') {
             var = append(var, *ch);
+
             if(!isdigit(*ch) && !isalpha(*ch)) {
                 expanded = appendStr(expanded, var);
+
                 var = NULL;
                 ch++;
+
                 continue;
             }
+            
             ch++;
         }
+
         if(*ch == '\0') {
             expanded = appendStr(expanded, var);
             return expanded;
         }
+
         expanded = appendStr(expanded, fetchVariable(var));
+
         var = NULL;
         ch++;
     }
+
     free(var);
+
     return expanded;
 }

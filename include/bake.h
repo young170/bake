@@ -17,3 +17,5 @@
  *                      build the first target
  */
 void bake(char *targetToBuild);
+
+extern bool b_option_flag;

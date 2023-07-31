@@ -18,6 +18,7 @@
 bool i_option_flag = false;
 bool n_option_flag = false;
 bool s_option_flag = false;
+bool b_option_flag = false;
 
 /**
  * Prints all variables, targets and actions to the user. The function iterates
@@ -85,6 +86,9 @@ int main(int argc, char *argv[]) {
 			case 'p':
 				p_option_flag = !p_option_flag;
 				break;
+            case 'B':
+                b_option_flag = !b_option_flag;
+                break;
 			case 's':
 				s_option_flag = !s_option_flag;
 				break;
@@ -111,12 +115,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	// check for any targetname options
-	char *build_target = NULL;
+	char *targetToBuild = NULL;
 	argc -= optind;
 	argv += optind;
 
 	if(argc > 0) {
-		build_target = *argv;
+		targetToBuild = *argv;
 	}
 
 	// check argument values
@@ -152,14 +156,16 @@ int main(int argc, char *argv[]) {
         free(filename);
     }
 
+    char *extend = NULL;
 	// iterate through the file
 	while(!feof(fp)) {
 		// reads extended '\' lines
-		char *extend = readFile(fp);
+		extend = read_file(fp);
 
 		// process the line if valid
 		if(extend && extend[0] != '\0') {
 			char *line = expandVariables(extend);
+
 			if(currentTarget != NULL && *line == '\t') {
 				processActionDef(line);
 	        } else {
@@ -168,8 +174,9 @@ int main(int argc, char *argv[]) {
 	        }
 		}
 	}
+    free(extend);
 
-    (p_option_flag) ? printInfo() : bake(build_target);
+    (p_option_flag) ? printInfo() : bake(targetToBuild);
 
 	fclose(fp);
 	exit(EXIT_SUCCESS);

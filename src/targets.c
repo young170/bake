@@ -1,8 +1,3 @@
-/* CITS2002 Project 2018
- * Names: Bruce How, Vincent Tian
- * Student numDepbers:	22242664, 22262122
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,22 +16,32 @@ target *currentTarget = NULL;
  * to the LinkedList and targetNode to accomodate for just enough space
  */
 void processActionDef(char *actLine) {
+    if (actLine[0] != '\t') {
+        fprintf(stderr, "%s: Actions should start with a tab\n", actLine);
+        return;
+    }
+
     actLine++; // Exclude leading tab
+
     if(currentTarget->numAct == 0) {
         currentTarget->actions = malloc(sizeof(char*));
+
         if(currentTarget->actions == NULL) {
             perror(__func__);
             exit(EXIT_FAILURE);
         }
+
         currentTarget->actions[0] = strdup(actLine);
         currentTarget->numAct++;
     } else {
         currentTarget->numAct++;
         currentTarget->actions = realloc(currentTarget->actions, currentTarget->numAct * sizeof(char*));
+
         if(currentTarget->actions == NULL) {
             perror(__func__);
             exit(EXIT_FAILURE);
         }
+
         currentTarget->actions[currentTarget->numAct-1] = strdup(actLine);
     }
 }

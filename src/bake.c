@@ -60,14 +60,21 @@ void buildTarget(char *target) {
 	// Iterator to iterate through the target list
 	struct targetNode *it = targetList;
 
+    if (it == NULL) {
+        fprintf(stderr, "%s: No such target found\n", target);
+        exit(EXIT_FAILURE);
+    }
+
 	// Find the target that matches 'target'
-	while(strcmp(it->target, target) != 0) {
+    while(strcmp(it->target, target) != 0) {
 		it = it->next;
+
 		if(it == NULL) {
 			fprintf(stderr, "%s: No such target found\n", target);
 			exit(EXIT_FAILURE);
 		}
 	}
+
 	// Date 0 is returned if the file is non-existant
 	time_t targetDate = getFileModDate(it->target);
 	time_t dependencyDate;
@@ -83,23 +90,30 @@ void buildTarget(char *target) {
 		} else {
 			dependencyDate = getFileModDate(it->dependencies[i]);
 		}
+
 		if(difftime(targetDate, dependencyDate) <= 0) {
 			buildRequired = true;
 
 			// See if the dependency is also a target
 			if(!isUrl(it->dependencies[i])) {
-				struct targetNode *itTar = targetList;
+				struct targetNode *itTarget = targetList;
 
-				while(itTar != NULL) {
-					if(strcmp(itTar->target, it->dependencies[i]) == 0) {
-						// Recursively build the target and it's dependecies
+				while(itTarget != NULL) {
+					if(strcmp(itTarget->target, it->dependencies[i]) == 0) {
+						// Recursively build the target and its dependecies
 						buildTarget(it->dependencies[i]);
 					}
-					itTar = itTar->next;
+
+					itTarget = itTarget->next;
 				}
 			}
 		}
 	}
+
+    if (b_option_flag) {
+        buildRequired = true;
+    }
+
 	if(buildRequired) {
 		for(int i = 0; i < it->numAct; i++) {
 			if(n_option_flag) {
@@ -109,9 +123,7 @@ void buildTarget(char *target) {
 				execute(it->actions[i]);
 			}
 		}
-	}
-	// No building required and we are trying to build targetToBuild
-	else if(strcmp(target, targetToBuild) == 0) {
+	} else if(strcmp(target, targetToBuild) == 0) { // No building required and we are trying to build targetToBuild
 		printf("Bake: '%s' is up to date\n", targetToBuild);
 		exit(EXIT_SUCCESS);
 	}
@@ -135,5 +147,6 @@ void bake(char *targetArg) {
 	} else {
 		targetToBuild = targetArg;
 	}
+
 	buildTarget(targetToBuild);
 }
