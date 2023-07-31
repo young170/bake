@@ -1,12 +1,28 @@
-# Make file for Bake
+# Makefile for bake
+#
+# $@ The name of the EXEC file (the one before the colon)
+# $< The name of the first (or only) prerequisite file (the first one after the colon)
+# $^ The names of all the prerequisite files (space separated)
+# $* The stem (the bit which matches the % wildcard in the rule definition.
+#
+CC = gcc -std=c99 -Werror -Wall -pedantic
+INCDIR = ./include
+SRCDIR = ./src
 
-PROGNAME = bake
-C99 = cc -std=c99 -Werror -Wall -pedantic
-DEPENDENCIES = append.c bake.c curl.c expandvar.c filedate.c main.c process.c readfile.c targets.c variables.c
+SRC = $(SRCDIR)/rushhour.c
+OBJ = $(SRC:.c=.o)
+EXE = bake
 
-Bake : $(DEPENDENCIES)
-	@$(C99) -o $(PROGNAME) $(DEPENDENCIES)
-	@echo "make: 'Bake' successfully built."
-clean :
-	@rm -f $(PROGNAME)
-	@echo "make: 'Bake' has been removed."
+# rule for link
+all: $(EXE)
+$(EXE): $(SRCDIR)/%.o
+	$(CC) -o $@ $^
+
+# rule for compilation
+$(SRCDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) -o $@ -c $< -I$(INCDIR)
+
+.PHONY: clean
+
+clean:
+	rm -f $(SRCDIR)/*.o $(EXE)
