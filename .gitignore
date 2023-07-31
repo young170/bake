@@ -1,0 +1,4 @@
+# object files
+*.o
+./src/*.o
+./test/*.o
