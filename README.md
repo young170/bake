@@ -21,6 +21,8 @@ The program can be ran with optional parameters. There are 6 optional parameters
 Only the targets, dependencies, and actions need be printed (though you may wish to also print the variables (names and values).
 * `-s` execute silently, do not print each shell-command-sequence before it is executed.
 
+The max characters that can be accommodated in a line is 1024.
+
 **Example Usage**
 ```bash
 bake -in -f fileToBake -C ../bakedir
